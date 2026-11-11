@@ -1,0 +1,104 @@
+{
+  "expo": {
+    "name": "Noor",
+    "slug": "noor",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "noor",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B3D2E"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.adangalma30.noor",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio"
+        ],
+        "NSLocationWhenInUseUsageDescription": "Noor uses your location only on this device to calculate accurate prayer times and Qibla direction. Nothing is ever sent anywhere.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.adangalma30.noor",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "POST_NOTIFICATIONS",
+        "SCHEDULE_EXACT_ALARM",
+        "USE_EXACT_ALARM",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "WAKE_LOCK",
+        "FOREGROUND_SERVICE",
+        "MODIFY_AUDIO_SETTINGS",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#0B3D2E"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#0B3D2E",
+          "defaultChannel": "reminders",
+          "sounds": [
+            "./assets/audio/adhan/doha_fajr.mp3",
+            "./assets/audio/adhan/doha_dhuhr.mp3",
+            "./assets/audio/adhan/doha_asr.mp3",
+            "./assets/audio/adhan/doha_maghrib.mp3",
+            "./assets/audio/adhan/doha_isha.mp3",
+            "./assets/audio/adhan/makkah.mp3",
+            "./assets/audio/adhan/makkah_fajr.mp3",
+            "./assets/audio/adhan/alaqsa.mp3",
+            "./assets/audio/adhan/cairo_abdul_baset.mp3",
+            "./assets/audio/adhan/fouad_fajr.mp3"
+          ]
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Noor uses your location only on this device to calculate accurate prayer times and Qibla direction. Nothing is ever sent anywhere."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false,
+      "reactCompiler": true
+    },
+    "web": {
+      "output": "static",
+      "bundler": "metro",
+      "favicon": "./assets/images/favicon.png"
+    }
+  }
+}
