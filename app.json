@@ -89,6 +89,39 @@
         {
           "microphonePermission": false
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Amiri_400Regular.ttf",
+            "./assets/fonts/Amiri_700Bold.ttf"
+          ],
+          "android": {
+            "fonts": [
+              {
+                "fontFamily": "Amiri_400Regular",
+                "path": "./assets/fonts/Amiri_400Regular.ttf",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/Amiri_400Regular.ttf",
+                    "weight": 400
+                  }
+                ]
+              },
+              {
+                "fontFamily": "Amiri_700Bold",
+                "path": "./assets/fonts/Amiri_700Bold.ttf",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/Amiri_700Bold.ttf",
+                    "weight": 700
+                  }
+                ]
+              }
+            ]
+          }
+        }
       ]
     ],
     "experiments": {

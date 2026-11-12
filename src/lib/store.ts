@@ -56,14 +56,17 @@ function subscribe(fn: () => void) {
 }
 
 export async function loadPersistedState(): Promise<void> {
+  // Storage-layer failures propagate so startup can surface a retryable error;
+  // corrupt JSON must never break the app — fall back to defaults.
+  const [s, p] = await Promise.all([AsyncStorage.getItem(SETTINGS_KEY), AsyncStorage.getItem(PROGRESS_KEY)]);
   try {
-    const [s, p] = await Promise.all([AsyncStorage.getItem(SETTINGS_KEY), AsyncStorage.getItem(PROGRESS_KEY)]);
     if (s) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(s) };
     if (p) progress = { ...DEFAULT_PROGRESS, ...JSON.parse(p) };
-    emit();
   } catch {
-    // Corrupt storage must never break the app — fall back to defaults.
+    settings = { ...DEFAULT_SETTINGS };
+    progress = { ...DEFAULT_PROGRESS };
   }
+  emit();
 }
 
 function persistSettings() {

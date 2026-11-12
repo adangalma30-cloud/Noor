@@ -98,6 +98,14 @@ Bump `version` (and `android.versionCode`) in `app.json`, commit, push, then run
 - Settings, bookmarks, tasbeeh counts and prayer history: local storage only
 - There is no login, no analytics, no network permission used for any essential feature
 
+## Startup reliability
+
+- Launch shows the NOOR splash, then the home dashboard — saved settings load with a **3-second timeout**, and the splash is force-hidden within **4 seconds** no matter what
+- The Amiri Arabic fonts are embedded natively at build time (never fetched, never a startup gate)
+- Audio mode, imported-recitation library and notification scheduling start *after* the dashboard is on screen; none of them can block it
+- If startup genuinely fails (e.g. device storage error), the app shows a clear message with a **Retry** button — never an endless loading screen
+- `scripts/run-startup-smoke.sh` runs the startup-sequence tests (timeout, corrupt data, storage failure) against the real modules
+
 ## Loading the full recitation library
 
 The bundled recitations are a curated sample (both reciters' complete sets are gigabytes).

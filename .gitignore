@@ -44,3 +44,6 @@ yarn-error.*
 # imported user audio & local build artifacts
 /assets/audio/imported/
 quran-audio/
+
+# smoke-test build output
+.smoke/
