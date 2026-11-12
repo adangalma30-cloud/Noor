@@ -104,6 +104,8 @@ Bump `version` (and `android.versionCode`) in `app.json`, commit, push, then run
 - The Amiri Arabic fonts are embedded natively at build time (never fetched, never a startup gate)
 - Audio mode, imported-recitation library and notification scheduling start *after* the dashboard is on screen; none of them can block it
 - If startup genuinely fails (e.g. device storage error), the app shows a clear message with a **Retry** button — never an endless loading screen
+- The splash screen animates (logo fade/scale, gold wordmark and underline) and hands over to the dashboard automatically
+- Debug APKs embed the full JS bundle (`plugins/withStandaloneJsBundle.js`), so the sideloaded app runs standalone — it never needs a dev server
 - `scripts/run-startup-smoke.sh` runs the startup-sequence tests (timeout, corrupt data, storage failure) against the real modules
 
 ## Loading the full recitation library

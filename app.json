@@ -122,7 +122,8 @@
             ]
           }
         }
-      ]
+      ],
+      "./plugins/withStandaloneJsBundle.js"
     ],
     "experiments": {
       "typedRoutes": false,

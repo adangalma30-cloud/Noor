@@ -10,8 +10,14 @@ import { configureNotificationHandler, rescheduleAll } from '../lib/schedule';
 import { runEssentialStartup } from '../lib/startup';
 import { useSettings } from '../lib/store';
 import { Radius, Spacing, useTheme } from '../theme';
+import { AnimatedSplash } from '../components/AnimatedSplash';
 
-SplashScreen.preventAutoHideAsync().catch(() => {});
+// The native splash is deliberately NOT held with preventAutoHideAsync: it
+// hands over to the animated JS splash on the first rendered frame and can
+// therefore never get stuck. This call is pure insurance in case any module
+// ever prevents auto-hide; a timer releases it unconditionally.
+SplashScreen.hideAsync().catch(() => {});
+setTimeout(() => SplashScreen.hideAsync().catch(() => {}), 2500);
 
 /** Absolute cap on how long the native splash may stay up, whatever happens. */
 const SPLASH_FALLBACK_MS = 4000;
@@ -22,6 +28,7 @@ export default function RootLayout() {
   const [phase, setPhase] = useState<Phase>('loading');
   const [attempt, setAttempt] = useState(0);
   const [startupError, setStartupError] = useState<string | null>(null);
+  const [splashDone, setSplashDone] = useState(false);
   const settings = useSettings();
   const t = useTheme();
 
@@ -113,6 +120,7 @@ export default function RootLayout() {
         <Stack.Screen name="tracker" options={{ title: 'Prayer Tracker' }} />
         <Stack.Screen name="licenses" options={{ title: 'Sources & Licenses' }} />
       </Stack>
+      {!splashDone && <AnimatedSplash onDone={() => setSplashDone(true)} />}
       <StatusBar style={t.dark ? 'light' : 'dark'} />
     </>
   );
