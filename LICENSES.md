@@ -17,6 +17,21 @@ and are never uploaded. Summary of everything shipped in this repository:
   convert and split (see https://clearquran.com/download). The wording of the translation is
   unmodified. Required credit: *Translation by Talal Itani, ClearQuran.com*.
 
+## Quran — transliteration (0.0.2)
+
+- **Quran transliteration (English romanization)** — the widely used quran.com
+  transliteration dataset (long vowels preserved via digraphs aa/ii/uu, hamza/ayn
+  marked with apostrophes, shadda shown by doubled consonants), obtained via the
+  AlQuran.cloud API, edition `en.transliteration` (source: quran.com translation
+  database). A verified, verse-aligned published dataset; it is stored offline in
+  the app database and is never generated at runtime. https://alquran.cloud
+
+## Quran — Swahili translation (0.0.2)
+
+- **Kiswahili (Swahili) translation by Ali Muhsin Al-Barwani** — obtained via the
+  AlQuran.cloud API, edition `sw.barwani` (source: quran.com translation database).
+  Wording unmodified; attributed to the translator. https://alquran.cloud
+
 ## Quran — recitations (bundled)
 
 | Reciter | Source | License | Bundled surahs |

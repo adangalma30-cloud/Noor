@@ -29,7 +29,8 @@ export const DEFAULT_SETTINGS: Settings = {
   },
   adhanVolume: 0.9,
   autoPlayAdhan: true,
-  showTranslation: true,
+  quranDisplay: 'arabic+translation',
+  translationLang: 'en',
   fontSize: 19,
   readingGoal: 20,
 };
@@ -60,7 +61,14 @@ export async function loadPersistedState(): Promise<void> {
   // corrupt JSON must never break the app — fall back to defaults.
   const [s, p] = await Promise.all([AsyncStorage.getItem(SETTINGS_KEY), AsyncStorage.getItem(PROGRESS_KEY)]);
   try {
-    if (s) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(s) };
+    if (s) {
+      const parsed = JSON.parse(s);
+      // Migrate pre-0.0.2 `showTranslation` into the Quran display mode.
+      if (!parsed.quranDisplay && typeof parsed.showTranslation === 'boolean') {
+        parsed.quranDisplay = parsed.showTranslation ? 'arabic+translation' : 'arabic';
+      }
+      settings = { ...DEFAULT_SETTINGS, ...parsed };
+    }
     if (p) progress = { ...DEFAULT_PROGRESS, ...JSON.parse(p) };
   } catch {
     settings = { ...DEFAULT_SETTINGS };

@@ -31,6 +31,14 @@ export default function LicensesScreen() {
         title="English translation — The Clear Quran"
         body={'"Translation by Talal Itani, ClearQuran.com" — released under CC BY-ND 4.0 with additional permissions to reformat. The wording is unchanged. https://clearquran.com'}
       />
+      <Block
+        title="Transliteration (English romanization)"
+        body="Quran transliteration dataset (the widely used quran.com romanization; long vowels and consonant distinctions preserved, e.g. aa/ii/uu, ' and `), obtained via AlQuran.cloud edition 'en.transliteration'. A verified published dataset — never machine-generated at runtime. https://alquran.cloud"
+      />
+      <Block
+        title="Swahili translation (Kiswahili)"
+        body="Swahili translation of the meanings of the Holy Quran by Ali Muhsin Al-Barwani, obtained via AlQuran.cloud edition 'sw.barwani' (source: quran.com translation database). Used with attribution; wording unchanged. https://alquran.cloud"
+      />
 
       <SectionTitle>Quran recitations (bundled)</SectionTitle>
       <Block

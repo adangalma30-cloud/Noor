@@ -1,18 +1,16 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import { FlatList, Pressable, Share, Text, View } from 'react-native';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
-import quranAr from '../../data/quran-ar.json';
-import quranEn from '../../data/quran-en.json';
 import surahs from '../../data/surahs.json';
 import { Card, Chip, Icon, Screen, Sub } from '../../components/ui';
-import { playSource, stopAudio } from '../../lib/audio';
+import { stopAudio } from '../../lib/audio';
 import { allReciters, findReciter, useLibrary } from '../../lib/library';
-import { toggleBookmark, updateProgress, useProgress, useSettings, getProgress } from '../../lib/store';
+import { loadQuranSources, loadSurahVerses, type QuranSources, type VerseRow } from '../../lib/quranDb';
+import { toggleBookmark, updateProgress, updateSettings, useProgress, useSettings, getProgress } from '../../lib/store';
+import { layersOf, modeFromLayers, type TranslationLang } from '../../types';
 import { Radius, Spacing, arabicStyle, useTheme } from '../../theme';
 
-const AR = quranAr as Record<string, Record<string, string>>;
-const EN = quranEn as Record<string, Record<string, string>>;
 const META = surahs as { id: number; ar: string; en: string; type: string; ayahs: number }[];
 
 const SPEEDS = [0.75, 1, 1.25, 1.5];
@@ -27,20 +25,29 @@ export default function SurahScreen() {
   const progress = useProgress();
   useLibrary();
 
-  const verses = useMemo(() => {
-    const ar = AR[String(surahId)] ?? {};
-    const en = EN[String(surahId)] ?? {};
-    return Object.keys(ar)
-      .map(Number)
-      .sort((a, b) => a - b)
-      .map((n) => ({ n, ar: ar[String(n)], en: en[String(n)] ?? '' }));
+  const layers = layersOf(settings.quranDisplay);
+
+  // Three-layer verses from the offline SQLite database (JSON fallback inside).
+  const [verses, setVerses] = useState<VerseRow[] | null>(null);
+  const [sources, setSources] = useState<QuranSources | null>(null);
+  useEffect(() => {
+    let alive = true;
+    setVerses(null);
+    loadSurahVerses(surahId).then((v) => {
+      if (alive) setVerses(v);
+    });
+    loadQuranSources().then((s) => {
+      if (alive) setSources(s);
+    });
+    return () => {
+      alive = false;
+    };
   }, [surahId]);
 
   const [reciterId, setReciterId] = useState(() => allReciters()[0]?.id ?? 'muammar');
   const [speed, setSpeed] = useState(1);
   const [repeat, setRepeat] = useState<'off' | 'surah' | 'verse'>('off');
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
-  const [showEn, setShowEn] = useState(settings.showTranslation);
   const reciter = findReciter(reciterId) ?? allReciters()[0];
   const hasSurahAudio = !!reciter?.files[surahId];
   const ayahFiles = reciter?.ayahFiles?.[surahId];
@@ -69,12 +76,13 @@ export default function SurahScreen() {
         player.playbackRate = speed;
         player.volume = settings.adhanVolume;
         player.play();
-        setPlayingAyah(ayah ?? null);
+        // The highlight is only truthful when a real per-ayah file is playing.
+        setPlayingAyah(ayahFiles && ayah != null ? ayah : null);
       } catch {
         // ignore player errors — UI stays usable
       }
     },
-    [player, sourceFor, speed, settings.adhanVolume]
+    [player, sourceFor, speed, settings.adhanVolume, ayahFiles]
   );
 
   const togglePlay = useCallback(() => {
@@ -87,23 +95,23 @@ export default function SurahScreen() {
     }
   }, [player, status.playing, status.currentTime, playFrom, playingAyah, ayahFiles]);
 
-  // Auto-advance / repeat handling on finish
+  // Auto-advance / repeat handling on finish (verse sync comes from per-ayah files).
   useEffect(() => {
     const sub = player.addListener('playbackStatusUpdate', (s: { didJustFinish?: boolean }) => {
       if (!s?.didJustFinish) return;
+      const len = verses?.length ?? meta.ayahs;
       if (repeat === 'verse' && playingAyah != null && ayahFiles) {
         playFrom(playingAyah);
       } else if (repeat === 'surah') {
         playFrom(ayahFiles ? 1 : undefined);
-      } else if (playingAyah != null && ayahFiles && playingAyah < verses.length) {
+      } else if (playingAyah != null && ayahFiles && playingAyah < len) {
         playFrom(playingAyah + 1);
-        setPlayingAyah(playingAyah + 1);
       } else {
         setPlayingAyah(null);
       }
     });
     return () => sub.remove();
-  }, [player, repeat, playingAyah, ayahFiles, playFrom, verses.length]);
+  }, [player, repeat, playingAyah, ayahFiles, playFrom, verses, meta.ayahs]);
 
   // Save last-read + reading progress as verses come into view
   const onViewable = useRef(({ viewableItems }: { viewableItems: { item: { n: number } }[] }) => {
@@ -128,6 +136,34 @@ export default function SurahScreen() {
   }, []);
 
   const bookmarkKeys = progress.bookmarks;
+
+  const toggleLayer = useCallback(
+    (key: 'arabic' | 'translit' | 'translation') => {
+      const next = { ...layers, [key]: !layers[key] };
+      if (!next.arabic && !next.translit && !next.translation) return; // always show something
+      updateSettings({ quranDisplay: modeFromLayers(next.arabic, next.translit, next.translation) });
+    },
+    [layers]
+  );
+
+  const shareVerse = useCallback(
+    (item: VerseRow) => {
+      const lang = settings.translationLang;
+      const translation = lang === 'sw' ? item.sw : item.en;
+      const trLabel = lang === 'sw' ? 'Swahili' : 'English';
+      const message = [
+        item.ar,
+        item.translit ? `\n${item.translit}` : '',
+        `\n${translation}`,
+        `\n— Quran ${meta.en} (${meta.id}), Ayah ${item.n} · NOOR`,
+        trLabel === 'Swahili' ? 'Swahili translation: Ali Muhsin Al-Barwani' : 'Translation by Talal Itani, ClearQuran.com.',
+      ]
+        .filter(Boolean)
+        .join('\n');
+      Share.share({ message }).catch(() => {});
+    },
+    [settings.translationLang, meta.en, meta.id]
+  );
 
   return (
     <Screen scroll={false} style={{ padding: 0 }}>
@@ -212,7 +248,22 @@ export default function SurahScreen() {
                 }}
               />
             ))}
-            <Chip small label={showEn ? 'Hide translation' : 'Show translation'} selected={showEn} onPress={() => setShowEn(!showEn)} />
+          </View>
+
+          <View style={{ flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.sm, flexWrap: 'wrap' }}>
+            <Chip small label="Arabic" selected={layers.arabic} onPress={() => toggleLayer('arabic')} />
+            <Chip small label="Transliteration" selected={layers.translit} onPress={() => toggleLayer('translit')} />
+            <Chip small label="Translation" selected={layers.translation} onPress={() => toggleLayer('translation')} />
+            {layers.translation && (
+              <Chip
+                small
+                label={settings.translationLang === 'sw' ? 'Swahili' : 'English'}
+                selected
+                onPress={() =>
+                  updateSettings({ translationLang: (settings.translationLang === 'en' ? 'sw' : 'en') as TranslationLang })
+                }
+              />
+            )}
           </View>
 
           {repeat === 'verse' && !ayahFiles && (
@@ -234,21 +285,39 @@ export default function SurahScreen() {
       </View>
 
       <FlatList
-        data={verses}
+        data={verses ?? []}
         keyExtractor={(v) => String(v.n)}
         contentContainerStyle={{ paddingHorizontal: Spacing.lg, paddingBottom: 140 }}
         onViewableItemsChanged={onViewable.current}
         viewabilityConfig={{ itemVisiblePercentThreshold: 60 }}
+        ListEmptyComponent={
+          verses === null ? (
+            <Sub style={{ marginTop: Spacing.xl, textAlign: 'center' }}>Loading surah…</Sub>
+          ) : undefined
+        }
+        ListFooterComponent={
+          sources ? (
+            <Card style={{ padding: Spacing.lg, marginTop: Spacing.lg }}>
+              <Text style={{ color: t.text, fontWeight: '800', fontSize: 13, marginBottom: Spacing.sm }}>Sources</Text>
+              <Sub>Arabic: {sources.arabic}</Sub>
+              <Sub style={{ marginTop: 3 }}>Transliteration: {sources.translit}</Sub>
+              <Sub style={{ marginTop: 3 }}>English: {sources.en}</Sub>
+              <Sub style={{ marginTop: 3 }}>Swahili: {sources.sw}</Sub>
+            </Card>
+          ) : undefined
+        }
         renderItem={({ item }) => {
           const bKey = `${surahId}:${item.n}`;
           const marked = !!bookmarkKeys[bKey];
+          const playing = playingAyah === item.n && status.playing;
+          const translation = settings.translationLang === 'sw' ? item.sw : item.en;
           return (
             <View
               style={{
                 backgroundColor: t.card,
                 borderRadius: Radius.md,
                 borderWidth: 1,
-                borderColor: marked ? t.gold : t.border,
+                borderColor: playing ? t.accent : marked ? t.gold : t.border,
                 padding: Spacing.lg,
                 marginTop: Spacing.md,
               }}
@@ -258,21 +327,53 @@ export default function SurahScreen() {
                   <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: t.goldSoft, alignItems: 'center', justifyContent: 'center' }}>
                     <Text style={{ color: t.gold, fontWeight: '800', fontSize: 11 }}>{item.n}</Text>
                   </View>
-                  {!!ayahFiles && (
-                    <Pressable onPress={() => { setPlayingAyah(item.n); playFrom(item.n); }} hitSlop={8}>
-                      <Icon name={playingAyah === item.n && status.playing ? 'pause' : 'play'} size={16} color={t.primary} filled={playingAyah === item.n && status.playing} />
-                    </Pressable>
-                  )}
+                  <Pressable onPress={() => playFrom(item.n)} hitSlop={8} disabled={!hasSurahAudio && !ayahFiles}>
+                    <Icon
+                      name={playing ? 'pause' : 'play'}
+                      size={16}
+                      color={hasSurahAudio || ayahFiles ? t.primary : t.track}
+                      filled={playing}
+                    />
+                  </Pressable>
                 </View>
-                <Pressable onPress={() => toggleBookmark(bKey)} hitSlop={8}>
-                  <Icon name="heart" size={18} color={marked ? t.gold : t.sub} filled={marked} />
-                </Pressable>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                  <Pressable onPress={() => shareVerse(item)} hitSlop={8}>
+                    <Icon name="share" size={17} color={t.sub} />
+                  </Pressable>
+                  <Pressable onPress={() => toggleBookmark(bKey)} hitSlop={8}>
+                    <Icon name="heart" size={18} color={marked ? t.gold : t.sub} filled={marked} />
+                  </Pressable>
+                </View>
               </View>
-              <Text style={{ ...arabicStyle(settings.fontSize + 8, t.text), lineHeight: (settings.fontSize + 8) * 1.95, marginTop: Spacing.sm }}>
-                {item.ar}
-              </Text>
-              {showEn && !!item.en && (
-                <Text style={{ color: t.sub, fontSize: 14, lineHeight: 22, marginTop: Spacing.md }}>{item.en}</Text>
+              {layers.arabic && !!item.ar && (
+                <Text
+                  style={{
+                    ...arabicStyle(settings.fontSize + 8, t.text),
+                    lineHeight: (settings.fontSize + 8) * 1.95,
+                    marginTop: Spacing.sm,
+                    textAlign: 'right',
+                    writingDirection: 'rtl',
+                  }}
+                >
+                  {item.ar}
+                </Text>
+              )}
+              {layers.translit && !!item.translit && (
+                <Text
+                  style={{
+                    color: t.sub,
+                    fontSize: 14.5,
+                    lineHeight: 24,
+                    fontStyle: 'italic',
+                    letterSpacing: 0.2,
+                    marginTop: Spacing.md,
+                  }}
+                >
+                  {item.translit}
+                </Text>
+              )}
+              {layers.translation && !!translation && (
+                <Text style={{ color: t.text, fontSize: 14.5, lineHeight: 23, marginTop: Spacing.md }}>{translation}</Text>
               )}
             </View>
           );

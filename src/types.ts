@@ -35,6 +35,43 @@ export interface City {
   p?: number;
 }
 
+export type QuranDisplayMode =
+  | 'arabic'
+  | 'translit'
+  | 'translation'
+  | 'arabic+translit'
+  | 'arabic+translation'
+  | 'all';
+
+export const QURAN_DISPLAY_MODES: QuranDisplayMode[] = [
+  'arabic',
+  'translit',
+  'translation',
+  'arabic+translit',
+  'arabic+translation',
+  'all',
+];
+
+export function layersOf(mode: QuranDisplayMode): { arabic: boolean; translit: boolean; translation: boolean } {
+  return {
+    arabic: mode === 'arabic' || mode === 'arabic+translit' || mode === 'arabic+translation' || mode === 'all',
+    translit: mode === 'translit' || mode === 'arabic+translit' || mode === 'all',
+    translation: mode === 'translation' || mode === 'arabic+translation' || mode === 'all',
+  };
+}
+
+export function modeFromLayers(arabic: boolean, translit: boolean, translation: boolean): QuranDisplayMode {
+  if (arabic && translit && translation) return 'all';
+  if (arabic && translation) return 'arabic+translation';
+  if (arabic && translit) return 'arabic+translit';
+  if (translit && translation) return 'all';
+  if (arabic) return 'arabic';
+  if (translit) return 'translit';
+  return 'translation';
+}
+
+export type TranslationLang = 'en' | 'sw';
+
 export interface Settings {
   locationMode: 'auto' | 'manual';
   city: City | null;
@@ -53,7 +90,8 @@ export interface Settings {
   adhanPerPrayer: Record<PrayerKey, string | null>;
   adhanVolume: number;
   autoPlayAdhan: boolean;
-  showTranslation: boolean;
+  quranDisplay: QuranDisplayMode;
+  translationLang: TranslationLang;
   fontSize: 17 | 19 | 21;
   readingGoal: number;
 }

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Noor",
     "slug": "noor",
-    "version": "1.0.0",
+    "version": "0.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "noor",
@@ -29,6 +29,7 @@
     },
     "android": {
       "package": "com.adangalma30.noor",
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
@@ -123,7 +124,8 @@
           }
         }
       ],
-      "./plugins/withStandaloneJsBundle.js"
+      "./plugins/withStandaloneJsBundle.js",
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": false,

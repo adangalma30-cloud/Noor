@@ -5,8 +5,17 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { Card, Chip, Divider, Icon, Row, Screen, SectionTitle, Segmented, Sub, Title } from '../../components/ui';
 import { METHOD_LABELS, updateSettings, useSettings } from '../../lib/store';
 import { rescheduleAll } from '../../lib/schedule';
-import type { MethodId } from '../../types';
+import { QURAN_DISPLAY_MODES, type MethodId, type QuranDisplayMode } from '../../types';
 import { Radius, Spacing, useTheme } from '../../theme';
+
+const DISPLAY_LABELS: Record<QuranDisplayMode, string> = {
+  arabic: 'Arabic only',
+  translit: 'Transliteration only',
+  translation: 'Translation only',
+  'arabic+translit': 'Arabic + transliteration',
+  'arabic+translation': 'Arabic + translation',
+  all: 'All three layers',
+};
 
 function Stepper({ value, onDec, onInc, label }: { value: string; onDec: () => void; onInc: () => void; label: string }) {
   const t = useTheme();
@@ -218,14 +227,30 @@ export default function SettingsScreen() {
           ]}
         />
         <Divider />
-        <Row
-          label="Show English translation"
-          right={
-            <Pressable onPress={() => updateSettings({ showTranslation: !settings.showTranslation })}>
-              <Icon name="check" size={20} color={settings.showTranslation ? t.primary : t.track} filled={settings.showTranslation} />
-            </Pressable>
-          }
+        <Text style={{ color: t.text, fontWeight: '700', marginTop: Spacing.md, marginBottom: Spacing.sm }}>Quran display</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
+          {QURAN_DISPLAY_MODES.map((m) => (
+            <Chip
+              key={m}
+              small
+              label={DISPLAY_LABELS[m]}
+              selected={settings.quranDisplay === m}
+              onPress={() => updateSettings({ quranDisplay: m })}
+            />
+          ))}
+        </View>
+        <Text style={{ color: t.text, fontWeight: '700', marginTop: Spacing.md, marginBottom: Spacing.sm }}>Translation language</Text>
+        <Segmented
+          value={settings.translationLang}
+          onChange={(v) => updateSettings({ translationLang: v })}
+          options={[
+            { value: 'en', label: 'English' },
+            { value: 'sw', label: 'Swahili' },
+          ]}
         />
+        <Sub style={{ marginTop: Spacing.sm }}>
+          English: Translation by Talal Itani, ClearQuran.com. · Swahili: Ali Muhsin Al-Barwani · Transliteration: quran.com dataset · Arabic: Tanzil.net
+        </Sub>
       </Card>
 
       <SectionTitle>Reading</SectionTitle>

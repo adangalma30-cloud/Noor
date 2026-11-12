@@ -25,7 +25,12 @@ No accounts, no subscriptions, no internet required — everything works in airp
 
 **Quran library**
 - Complete Arabic text of all 114 surahs (Uthmani script) — fully offline
-- The Clear Quran English translation (Talal Itani) — toggleable
+- Three-layer verse display (v0.0.2): Arabic, **transliteration** (verified quran.com
+  romanization dataset) and translation, in any combination of the six display modes
+- Translations: The Clear Quran English (Talal Itani) and **Kiswahili/Swahili**
+  (Ali Muhsin Al-Barwani) — selectable, fully attributed
+- All layers stored in a local **SQLite database** (`assets/data/quran.db`) — no
+  network, works in airplane mode; per-verse play, bookmark and share
 - Three bundled reciters (H. Muammar ZA, Saad Al-Ghamdi, Atcovi-CC0 samples) with
   different voices; unlimited imported reciters
 - Full-surah playback with play/pause, next/previous surah, repeat surah, adjustable speed
