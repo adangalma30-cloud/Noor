@@ -102,6 +102,7 @@ export interface Progress {
   tracker: Record<string, Record<PrayerKey, boolean>>;
   readingLog: Record<string, number>;
   tasbeeh: { count: number; total: number; preset: string };
+  namesFavs: Record<string, boolean>;
 }
 
 export interface AdhanTrack {

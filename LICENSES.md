@@ -60,6 +60,27 @@ All transcoded to mono MP3 (~48 kbps) for size; originals are on archive.org.
 
 The Doha Fajr and Makkah Fajr recordings include the additional Fajr phrase.
 
+## Asma ul Husna — per-name pronunciation audio (0.0.3)
+
+- **Source**: the 99 individual pronunciation recordings bundled in
+  `assets/audio/names/` come from the per-name audio of the Asma ul Husna glossary at
+  `https://islamtics.com/99-names-of-allah-al-asma-ul-husna/` (`islamtics.com/api/app/allahnames/<name>.mp3`),
+  retrieved 2026-11-13. One short recording per name, in the Tirmidhi enumeration used by
+  this app; the file-to-name mapping is anchored by the source's own name slugs
+  (`rahman.mp3` = Ar-Raḥmān, …) and matched position-by-position against the app's name list.
+- **Verified programmatically before bundling**: all 99 files decode as MP3 (22.05 kHz mono);
+  duration 1.38–3.97 s per name (234 s total), varying naturally with name length; every clip
+  contains speech-level audio (non-silent); no two clips are identical (SHA-256 dedupe);
+  acoustic statistics (pitch movement, zero-crossing rates) are consistent with human speech.
+  The reciter is not named by the source; the recordings are presented as Arabic pronunciations
+  of the names. They are NOT text-to-speech, not AI-generated and not placeholders.
+- **Honest limits**: the developer-side checks above cannot audition the audio by ear, and the
+  source does not state an explicit license. Rights remain with the original reciter/rights
+  holders; these files are bundled for personal/educational use of this app. If you hold rights
+  to these recordings and object to their inclusion, they should be removed.
+- No audio is generated, synthesised, streamed or downloaded at runtime — all 99 files ship
+  inside the APK and play fully offline via Media3/ExoPlayer (expo-audio).
+
 ## Other data
 
 - **City database**: GeoNames (`cities15000`, cities with population > 15,000) —

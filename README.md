@@ -42,7 +42,10 @@ No accounts, no subscriptions, no internet required — everything works in airp
 - Qibla compass (device magnetometer + computed bearing)
 - Hijri calendar with Islamic events (Umm al-Qura style conversion, ±2 day adjustment)
 - Morning & evening Adhkar and post-prayer Adhkar with counters
-- Daily Duas and 99 Names of Allah
+- Daily Duas and 99 Names of Allah — with (v0.0.3) an interactive **Asma ul Husna** screen:
+  all 99 names with Arabic (RTL), transliteration, English meaning, a short explanation of
+  each name, search, favourites and **per-name authentic pronunciation audio** (99 individual
+  recordings bundled offline — play, replay and stop; no streaming, no TTS, no downloads)
 - Prayer tracker with streaks and a monthly view
 
 **Design**
@@ -105,11 +108,15 @@ Bump `version` (and `android.versionCode`) in `app.json`, commit, push, then run
 
 ## Startup reliability
 
-- Launch shows the NOOR splash, then the home dashboard — saved settings load with a **3-second timeout**, and the splash is force-hidden within **4 seconds** no matter what
+- Launch shows the Islamic splash (v0.0.3: Bismillah calligraphy in the bundled Amiri font with
+  transliteration and meaning, a golden mosque scene, and the NOOR wordmark with tagline —
+  staggered fade-ins, timer-driven, ~2.5 s, then a smooth fade to the dashboard), then the home
+  dashboard — saved settings load with a **3-second timeout**, and the splash is force-hidden
+  within **4 seconds** no matter what
 - The Amiri Arabic fonts are embedded natively at build time (never fetched, never a startup gate)
 - Audio mode, imported-recitation library and notification scheduling start *after* the dashboard is on screen; none of them can block it
 - If startup genuinely fails (e.g. device storage error), the app shows a clear message with a **Retry** button — never an endless loading screen
-- The splash screen animates (logo fade/scale, gold wordmark and underline) and hands over to the dashboard automatically
+- The splash animation is cosmetic only (fade choreography) and hands over to the dashboard automatically — it can never prevent the app from opening
 - Debug APKs embed the full JS bundle (`plugins/withStandaloneJsBundle.js`), so the sideloaded app runs standalone — it never needs a dev server
 - `scripts/run-startup-smoke.sh` runs the startup-sequence tests (timeout, corrupt data, storage failure) against the real modules
 

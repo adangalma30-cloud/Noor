@@ -41,6 +41,7 @@ export const DEFAULT_PROGRESS: Progress = {
   tracker: {},
   readingLog: {},
   tasbeeh: { count: 0, total: 0, preset: 'سُبْحَانَ اللَّهِ' },
+  namesFavs: {},
 };
 
 let settings: Settings = DEFAULT_SETTINGS;
@@ -109,6 +110,13 @@ export function toggleBookmark(key: string): void {
   if (bookmarks[key]) delete bookmarks[key];
   else bookmarks[key] = true;
   updateProgress({ bookmarks });
+}
+
+export function toggleNameFav(key: string): void {
+  const namesFavs = { ...(progress.namesFavs ?? {}) };
+  if (namesFavs[key]) delete namesFavs[key];
+  else namesFavs[key] = true;
+  updateProgress({ namesFavs });
 }
 
 export function logPrayer(dateKey: string, prayer: PrayerKey, value: boolean): void {
