@@ -47,3 +47,4 @@ quran-audio/
 
 # smoke-test build output
 .smoke/
+.smoke-tasbeeh/

@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
 import type { City, MethodId, PrayerKey, Progress, Settings } from '../types';
+import { newSequence, normalizeSequence } from './tasbeeh';
 
 const SETTINGS_KEY = 'noor.settings.v1';
 const PROGRESS_KEY = 'noor.progress.v1';
@@ -33,6 +34,9 @@ export const DEFAULT_SETTINGS: Settings = {
   translationLang: 'en',
   fontSize: 19,
   readingGoal: 20,
+  vibrateEnabled: true,
+  vibrateOnCount: false,
+  vibrateOnTarget: true,
 };
 
 export const DEFAULT_PROGRESS: Progress = {
@@ -42,6 +46,8 @@ export const DEFAULT_PROGRESS: Progress = {
   readingLog: {},
   tasbeeh: { count: 0, total: 0, preset: 'سُبْحَانَ اللَّهِ' },
   namesFavs: {},
+  tasbeehSeq: newSequence(),
+  dhikrStats: {},
 };
 
 let settings: Settings = DEFAULT_SETTINGS;
@@ -75,6 +81,15 @@ export async function loadPersistedState(): Promise<void> {
     settings = { ...DEFAULT_SETTINGS };
     progress = { ...DEFAULT_PROGRESS };
   }
+  // Defensive normalisation: a partial/corrupt persisted Tasbeeh session must
+  // never break the screen — fill missing fields and clamp indices.
+  progress = {
+    ...progress,
+    tasbeeh: { ...DEFAULT_PROGRESS.tasbeeh, ...progress.tasbeeh },
+    namesFavs: progress.namesFavs ?? {},
+    tasbeehSeq: normalizeSequence(progress.tasbeehSeq),
+    dhikrStats: progress.dhikrStats ?? {},
+  };
   emit();
 }
 

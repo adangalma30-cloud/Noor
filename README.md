@@ -1,5 +1,11 @@
 # NOOR — Your Daily Prayer Companion
 
+> **0.0.4** — install reliability: per-architecture APKs (arm64-v8a, armeabi-v7a, x86_64, x86)
+> plus a universal fallback, release (non-debuggable) builds, and an automated adb install &
+> launch test on an Android emulator; **Smart Tasbeeh**: default 4-Dhikr sequence
+> (SubhanAllah · Astaghfirullah · Alhamdulillah · Allahu Akbar) with automatic advancement at
+> the target, custom sequences/targets, vibration settings, daily statistics and session restore.
+
 A complete, **offline-first** Islamic prayer app for Android (iOS-ready), built with React Native + Expo.
 No accounts, no subscriptions, no internet required — everything works in airplane mode.
 
@@ -38,7 +44,10 @@ No accounts, no subscriptions, no internet required — everything works in airp
 - Background playback with the screen off; bookmarks; last-read position; daily reading goal
 
 **Islamic tools**
-- Digital Tasbeeh counter (presets, targets, saved totals, haptics)
+- Digital Tasbeeh counter (presets, targets, saved totals, haptics) — with (v0.0.4) the **Smart
+  Tasbeeh**: customisable Dhikr sequences with automatic advancement at the target (vibrate →
+  mark complete → advance → reset), targets 10/33/34/99/custom, add/reorder/remove phrases,
+  daily statistics, and progress that survives app restarts
 - Qibla compass (device magnetometer + computed bearing)
 - Hijri calendar with Islamic events (Umm al-Qura style conversion, ±2 day adjustment)
 - Morning & evening Adhkar and post-prayer Adhkar with counters

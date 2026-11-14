@@ -94,7 +94,37 @@ export interface Settings {
   translationLang: TranslationLang;
   fontSize: 17 | 19 | 21;
   readingGoal: number;
+  vibrateEnabled: boolean;
+  vibrateOnCount: boolean;
+  vibrateOnTarget: boolean;
 }
+
+export type DhikrItem = {
+  id: string;
+  ar: string;
+  translit: string;
+  meaning: string;
+};
+
+export type TasbeehSequence = {
+  items: DhikrItem[];
+  target: number;
+  /** Position of the current Dhikr in the sequence. */
+  index: number;
+  /** Count for the current Dhikr (0 … target). */
+  count: number;
+  /** Completed flags for the current cycle, indexed like items. */
+  completed: boolean[];
+  /** Fully completed cycles (all-time). */
+  cycles: number;
+};
+
+export type DhikrDayStats = {
+  /** dhikr id -> count accumulated today. */
+  counts: Record<string, number>;
+  /** full sequences completed today. */
+  cycles: number;
+};
 
 export interface Progress {
   bookmarks: Record<string, boolean>;
@@ -103,6 +133,8 @@ export interface Progress {
   readingLog: Record<string, number>;
   tasbeeh: { count: number; total: number; preset: string };
   namesFavs: Record<string, boolean>;
+  tasbeehSeq: TasbeehSequence;
+  dhikrStats: Record<string, DhikrDayStats>;
 }
 
 export interface AdhanTrack {
